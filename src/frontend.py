@@ -1,23 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-
-
+from backend import noofdelivery, disttravelled, salary, fuelsaved, vehicletype, startdelivery
+from tkinter import messagebox
 import tkinter as tk
 from PIL import Image, ImageTk
 
 def show_loading_screen():
     title = "Welcome to My App"
     message = "Loading... Please wait."
-    image_path = r"C:\Users\jeeva\OneDrive\Documents\FedEx HAkathon\Dynamic-Route-Optimization-and-Emission-Reduction-System-\src\icon.jpg"
+    image_path = "src\\icon.jpg"
 
     def animate_spinner():
         """Creates and animates a spinning circle."""
-        # Clear the canvas
         canvas.delete("all")
 
         # Get canvas dimensions for responsiveness
-        width = canvas.winfo_width() or 200  # Default width if not yet rendered
+        width = canvas.winfo_width() or 200
         height = 200  # Fixed height for spinner
 
         # Set the size and position of the spinner
@@ -48,9 +47,13 @@ def show_loading_screen():
 
     def load_image(path, size):
         """Load and resize an image using Pillow."""
-        img = Image.open(path)
-        img = img.resize(size, Image.Resampling.LANCZOS)  # High-quality resizing
-        return ImageTk.PhotoImage(img)
+        try:
+            img = Image.open(path)
+            img = img.resize(size, Image.Resampling.LANCZOS)  # High-quality resizing
+            return ImageTk.PhotoImage(img)
+        except Exception as e:
+            print(f"Error loading image: {e}")
+            return None  # Return None if image fails to load
 
     # Create the main window
     root = tk.Tk()
@@ -72,8 +75,11 @@ def show_loading_screen():
     # Center Image
     if image_path:
         center_image = load_image(image_path, (300, 300))  # Resize to 300x300
-        image_label = tk.Label(root, image=center_image, bg="#000000")
-        image_label.pack(expand=True)
+        '''if center_image:
+            #image_label = tk.Label(root, image=center_image, bg="#000000")
+            image_label.pack(expand=True)
+        else:
+            print("Failed to load image.")'''
 
     # Bottom Message
     message_label = tk.Label(
@@ -92,35 +98,101 @@ def show_loading_screen():
     angle = [0]  # Mutable angle to allow updates in the nested function
     animate_spinner()  # Start the spinner animation
 
-    # Close the loading screen after 5 seconds"""
+    # Close the loading screen after 5 seconds
     root.after(5000, root.destroy)
 
     root.mainloop()
 
-#show_loading_screen()
-
-import tkinter as tk
-from backend import noofdelivery, disttravelled, salary, fuelsaved, vehicletype, startdelivery
-
-
-import tkinter as tk
-from tkinter import messagebox
+deliveries = []
 
 def save_delivery_data(address, delivery_date, vehicle_type):
-    """Save the delivery data to a text file."""
-    with open("deliveries.txt", "a") as file:
-        file.write(f"Address: {address}\n")
-        file.write(f"Delivery Date: {delivery_date}\n")
-        file.write(f"Vehicle Type: {vehicle_type}\n")
-        file.write("-" * 30 + "\n")
+    """Function to save delivery data into the deliveries list"""
+    deliveries.append({
+        "from": "Unknown",  # You can customize this as per your use case
+        "to": "Unknown",    # Same here
+        "orderId": f"#{len(deliveries)+1}",
+        "status": "Pending",
+        "progress": 0,
+        "weight": "Unknown",  # Add your own logic to handle weight
+        "price": "Unknown",   # Add your own logic to handle price
+        "departure": delivery_date,
+        "driver": "Unknown", # You can customize this
+    })
+
+def display_delivery_tracking(deliveries):
+    """Function to display all the deliveries in a new window"""
+    # Create a new top-level window to show the deliveries
+    delivery_window = tk.Toplevel()
+    delivery_window.title("All Deliveries")
+    delivery_window.geometry("1000x600")
     
-    # Show success message
-    messagebox.showinfo("Success", "Delivery details saved successfully!")
+    # Frame for the delivery list
+    delivery_frame = tk.Frame(delivery_window, bg="#212121")
+    delivery_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+    
+    # Loop through all deliveries and add them to the list
+    for delivery in deliveries:
+        card_frame = tk.Frame(delivery_frame, bg="#2A2A2A", padx=10, pady=10)
+        card_frame.pack(fill=tk.X, pady=5)
+
+        # Title
+        title = tk.Label(
+            card_frame,
+            text=f"Package from {delivery['from']} to {delivery['to']}",
+            font=("Arial", 14, "bold"),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        title.pack(anchor="w")
+
+        # Order ID and Status
+        order_status = tk.Label(
+            card_frame,
+            text=f"Order ID: {delivery['orderId']} | Status: {delivery['status']}",
+            font=("Arial", 12),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        order_status.pack(anchor="w")
+
+        # Progress bar
+        progress_bar = ttk.Progressbar(
+            card_frame,
+            value=delivery["progress"],
+            maximum=100
+        )
+        progress_bar.pack(fill=tk.X, pady=5)
+
+        # Driver info placeholder
+        driver_info = tk.Frame(card_frame, bg="#2A2A2A")
+        driver_info.pack(fill=tk.X, pady=5)
+
+        driver_label = tk.Label(
+            driver_info,
+            text=f"Driver: {delivery['driver']}",
+            font=("Arial", 12),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        driver_label.pack(side=tk.LEFT)
+
+        contact_btn = tk.Button(
+            driver_info,
+            text="Contact",
+            font=("Arial", 10),
+            bg="#1E88E5",
+            fg="white",
+            bd=0,
+            padx=10
+        )
+        contact_btn.pack(side=tk.RIGHT)
+
+    delivery_window.mainloop()
 
 def deliveryscreen():
     # Initialize the delivery screen window
     delivery_window = tk.Toplevel()  # Create a new top-level window
-    delivery_window.title("Delivery Details")
+    delivery_window.title("Start Delivery")
     delivery_window.geometry("600x400")
     delivery_window.configure(bg="#1E1E1E")
 
@@ -185,8 +257,11 @@ def deliveryscreen():
         else:
             # Save the data
             save_delivery_data(address, delivery_date, vehicle_type)
-            # Close the delivery screen window
-            delivery_window.destroy()
+            # Reset the form fields after saving
+            address_entry.delete(0, tk.END)
+            date_entry.delete(0, tk.END)
+            vehicle_entry.delete(0, tk.END)
+            
 
     submit_button = tk.Button(
         delivery_window,
@@ -201,8 +276,22 @@ def deliveryscreen():
     )
     submit_button.pack(pady=20)
 
+    # Button to view all deliveries
+    show_button = tk.Button(
+        delivery_window,
+        text="View All Deliveries",
+        font=("Arial", 16),
+        bg="#1E88E5",  # Blue color
+        fg="#FFFFFF",
+        command=lambda: display_delivery_tracking(deliveries),
+        relief="raised",
+        width=20,
+        height=2
+    )
+    show_button.pack(pady=10)
+
     # Start the delivery screen window
-    delivery_window.mainloop()
+    #delivery_window.mainloop()
 
 def main_screen():
     # Initialize the main window
@@ -295,6 +384,124 @@ def main_screen():
     # Start the main loop
     root.mainloop()
 
-# Call the function to display the main screen
-if __name__ == "__main__":
-    main_screen()
+def display_delivery_tracking(deliveries):
+    # Create the main app window
+    root = tk.Tk()
+    root.title("Delivery Tracking")
+    root.geometry("1000x600")
+    root.configure(bg="#212121")  # Dark background
+
+    # Sidebar for navigation
+    sidebar = tk.Frame(root, bg="#1E1E1E", width=80)
+    sidebar.pack(side=tk.LEFT, fill=tk.Y)
+
+    icons = ["Home", "Location", "Settings"]
+    for icon in icons:
+        btn = tk.Button(
+            sidebar,
+            text=icon,
+            font=("Arial", 12),
+            bg="#1E1E1E",
+            fg="white",
+            bd=0,
+            activebackground="#333333",
+            activeforeground="white"
+        )
+        btn.pack(pady=20)
+
+    # Main content divided into two sections (left and right)
+    main_frame = tk.Frame(root, bg="#212121")
+    main_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    # Left section for delivery list
+    delivery_frame = tk.Frame(main_frame, bg="#212121", width=400)
+    delivery_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+
+    # Scrollable area for deliveries
+    canvas = tk.Canvas(delivery_frame, bg="#212121", highlightthickness=0)
+    scrollbar = ttk.Scrollbar(delivery_frame, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg="#212121")
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    # Add delivery cards to scrollable frame
+    for delivery in deliveries:
+        card_frame = tk.Frame(scrollable_frame, bg="#2A2A2A", padx=10, pady=10)
+        card_frame.pack(fill=tk.X, pady=5)
+
+        # Title
+        title = tk.Label(
+            card_frame,
+            text=f"Package from {delivery['from']} to {delivery['to']}",
+            font=("Arial", 14, "bold"),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        title.pack(anchor="w")
+
+        # Order ID and Status
+        order_status = tk.Label(
+            card_frame,
+            text=f"Order ID: {delivery['orderId']} | Status: {delivery['status']}",
+            font=("Arial", 12),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        order_status.pack(anchor="w")
+
+        # Progress bar
+        progress_bar = ttk.Progressbar(
+            card_frame,
+            value=delivery["progress"],
+            maximum=100
+        )
+        progress_bar.pack(fill=tk.X, pady=5)
+
+        # Driver and contact
+        driver_info = tk.Frame(card_frame, bg="#2A2A2A")
+        driver_info.pack(fill=tk.X, pady=5)
+
+        driver_label = tk.Label(
+            driver_info,
+            text=f"Driver: {delivery['driver']}",
+            font=("Arial", 12),
+            bg="#2A2A2A",
+            fg="white"
+        )
+        driver_label.pack(side=tk.LEFT)
+
+        contact_btn = tk.Button(
+            driver_info,
+            text="Contact",
+            font=("Arial", 10),
+            bg="#1E88E5",
+            fg="white",
+            bd=0,
+            padx=10
+        )
+        contact_btn.pack(side=tk.RIGHT)
+
+    # Right section for map
+    map_frame = tk.Frame(main_frame, bg="black")
+    map_frame.pack(side=tk.RIGHT, fill=tk.BOTH, padx=10, pady=10, expand=True)
+
+    map_label = tk.Label(
+        map_frame,
+        text="Map Placeholder",
+        font=("Arial", 16),
+        bg="black",
+        fg="white"
+    )
+    map_label.pack(expand=True)
+
+    # Run the app
+    root.mainloop()
