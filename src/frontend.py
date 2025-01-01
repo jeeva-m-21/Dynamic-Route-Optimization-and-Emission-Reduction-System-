@@ -3,7 +3,14 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 
-def show_loading_screen(title="Loading", message="Please wait...", image_path=None):
+import tkinter as tk
+from PIL import Image, ImageTk
+
+def show_loading_screen():
+    title = "Welcome to My App"
+    message = "Loading... Please wait."
+    image_path = r"C:\Users\jeeva\OneDrive\Documents\FedEx HAkathon\Dynamic-Route-Optimization-and-Emission-Reduction-System-\src\icon.jpg"
+
     def animate_spinner():
         """Creates and animates a spinning circle."""
         # Clear the canvas
@@ -19,12 +26,15 @@ def show_loading_screen(title="Loading", message="Please wait...", image_path=No
 
         # Draw the spinner arc
         canvas.create_arc(
-            width / 2 - radius, height / 2 - radius, width / 2 + radius, height / 2 + radius,  # Bounding box
+            width / 2 - radius,
+            height / 2 - radius,
+            width / 2 + radius,
+            height / 2 + radius,  # Bounding box
             start=angle[0],
             extent=60,  # Angle of the arc
             width=thickness,  # Line thickness for smooth spinner
             outline="#FFFFFF",  # White spinner color
-            style=tk.ARC
+            style=tk.ARC,
         )
 
         # Update the angle to rotate the spinner
@@ -55,7 +65,7 @@ def show_loading_screen(title="Loading", message="Please wait...", image_path=No
         text=title,
         font=("Arial", 36, "bold"),
         bg="#000000",
-        fg="#FFFFFF"
+        fg="#FFFFFF",
     )
     title_label.pack(pady=20)
 
@@ -71,7 +81,7 @@ def show_loading_screen(title="Loading", message="Please wait...", image_path=No
         text=message,
         font=("Arial", 18),
         bg="#000000",
-        fg="#FFFFFF"
+        fg="#FFFFFF",
     )
     message_label.pack(pady=10, side=tk.BOTTOM)
 
@@ -80,17 +90,17 @@ def show_loading_screen(title="Loading", message="Please wait...", image_path=No
     canvas.pack(pady=20, side=tk.BOTTOM)
 
     angle = [0]  # Mutable angle to allow updates in the nested function
-    animate_spinner()  # Start the spinner animation
+    #animate_spinner()  # Start the spinner animation
+
+    # Close the loading screen after 5 seconds
+    root.after(5000, root.destroy)
 
     root.mainloop()
 
-''' Usage example:
-image_path = r"C:\Users\jeeva\OneDrive\Documents\FedEx HAkathon\Dynamic-Route-Optimization-and-Emission-Reduction-System-\src\icon.jpg"
-show_loading_screen(title="Welcome to My App", message="Loading... Please wait.", image_path=image_path)'''
+#show_loading_screen()
 
 import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
+from backend import noofdelivery, disttravelled, salary, fuelsaved, vehicletype, startdelivery
 
 
 def main_screen():
@@ -114,88 +124,51 @@ def main_screen():
     )
     title_label.pack(pady=30)
 
-    # Left Panel for Inputs
+    # Left Panel for Function Values
     left_frame = tk.Frame(root, bg="#1E1E1E", width=400, pady=10, padx=20)
     left_frame.pack(side="left", fill="y")
 
     tk.Label(
         left_frame,
-        text="Vehicle Details",
+        text="Function Outputs",
         font=("Arial", 18, "bold"),
         bg="#1E1E1E",
         fg="#FFFFFF"
     ).pack(pady=10)
 
-    # Vehicle Detail Inputs
-    ttk.Label(left_frame, text="Fuel Type:", background="#1E1E1E", foreground="#FFFFFF").pack(anchor="w", pady=5)
-    fuel_type = ttk.Combobox(left_frame, values=["Petrol", "Diesel", "Electric"], state="readonly")
-    fuel_type.pack(fill="x")
+    # Display Values from Functions
+    function_values = {
+        "Number of Deliveries": noofdelivery(),
+        "Distance Travelled": disttravelled(),
+        "Driver Salary": salary(),
+        "Fuel Saved": fuelsaved(),
+        "Vehicle Type": vehicletype(),
+        "Start Delivery Status": startdelivery(),
+    }
 
-    ttk.Label(left_frame, text="Fuel Efficiency (km/l or kWh/100km):", background="#1E1E1E", foreground="#FFFFFF").pack(anchor="w", pady=5)
-    fuel_efficiency = ttk.Entry(left_frame)
-    fuel_efficiency.pack(fill="x")
+    for name, value in function_values.items():
+        tk.Label(
+            left_frame,
+            text=f"{name}: {value}",
+            bg="#1E1E1E",
+            fg="#FFFFFF",
+            font=("Arial", 14),
+            pady=10
+        ).pack(anchor="w", padx=10)
 
-    ttk.Label(left_frame, text="Capacity (kg):", background="#1E1E1E", foreground="#FFFFFF").pack(anchor="w", pady=5)
-    vehicle_capacity = ttk.Entry(left_frame)
-    vehicle_capacity.pack(fill="x")
-
-    # Source and Destination
-    tk.Label(
-        left_frame,
-        text="Route Details",
-        font=("Arial", 18, "bold"),
-        bg="#1E1E1E",
-        fg="#FFFFFF"
-    ).pack(pady=20)
-
-    ttk.Label(left_frame, text="Source:", background="#1E1E1E", foreground="#FFFFFF").pack(anchor="w", pady=5)
-    source_entry = ttk.Entry(left_frame)
-    source_entry.pack(fill="x")
-
-    ttk.Label(left_frame, text="Destination:", background="#1E1E1E", foreground="#FFFFFF").pack(anchor="w", pady=5)
-    destination_entry = ttk.Entry(left_frame)
-    destination_entry.pack(fill="x")
-
-    # Buttons
-    tk.Button(
-        left_frame,
-        text="Calculate Route",
-        bg="#3A3A3A",
-        fg="#FFFFFF",
-        font=("Arial", 14, "bold"),
-        cursor="hand2"
-    ).pack(fill="x", pady=10)
-
-    tk.Button(
-        left_frame,
-        text="View Emission Data",
-        bg="#3A3A3A",
-        fg="#FFFFFF",
-        font=("Arial", 14, "bold"),
-        cursor="hand2"
-    ).pack(fill="x", pady=10)
-
-    tk.Button(
-        left_frame,
-        text="Generate Report",
-        bg="#3A3A3A",
-        fg="#FFFFFF",
-        font=("Arial", 14, "bold"),
-        cursor="hand2"
-    ).pack(fill="x", pady=10)
-
-    # Right Panel for Real-Time Data
+    # Right Panel for Details
     right_frame = tk.Frame(root, bg="#1E1E1E", pady=20, padx=20)
     right_frame.pack(side="right", expand=True, fill="both")
 
     tk.Label(
         right_frame,
-        text="Real-Time Data",
+        text="Real-Time Data (Placeholder)",
         font=("Arial", 18, "bold"),
         bg="#1E1E1E",
         fg="#FFFFFF"
     ).pack(pady=10)
 
+    # Placeholder for real-time data
     traffic_label = tk.Label(
         right_frame,
         text="Traffic Status: Loading...",
@@ -231,5 +204,6 @@ def main_screen():
     root.mainloop()
 
 
-# Call the function
-#main_screen()
+# Call the function to display the main screen
+if __name__ == "__main__":
+    main_screen()
