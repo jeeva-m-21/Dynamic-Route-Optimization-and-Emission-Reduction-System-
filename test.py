@@ -1,4 +1,4 @@
-def show_loading_screen():
+'''def show_loading_screen():
     title = "Welcome to My App"
     message = "Loading... Please wait."
     image_path = r"C:\Users\jeeva\OneDrive\Documents\FedEx HAkathon\Dynamic-Route-Optimization-and-Emission-Reduction-System-\src\icon.jpg"
@@ -88,3 +88,4 @@ def show_loading_screen():
     root.after(5000, root.destroy)
 
     root.mainloop()
+'''

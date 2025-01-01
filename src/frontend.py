@@ -90,9 +90,9 @@ def show_loading_screen():
     canvas.pack(pady=20, side=tk.BOTTOM)
 
     angle = [0]  # Mutable angle to allow updates in the nested function
-    #animate_spinner()  # Start the spinner animation
+    animate_spinner()  # Start the spinner animation
 
-    # Close the loading screen after 5 seconds
+    # Close the loading screen after 5 seconds"""
     root.after(5000, root.destroy)
 
     root.mainloop()
@@ -102,6 +102,107 @@ def show_loading_screen():
 import tkinter as tk
 from backend import noofdelivery, disttravelled, salary, fuelsaved, vehicletype, startdelivery
 
+
+import tkinter as tk
+from tkinter import messagebox
+
+def save_delivery_data(address, delivery_date, vehicle_type):
+    """Save the delivery data to a text file."""
+    with open("deliveries.txt", "a") as file:
+        file.write(f"Address: {address}\n")
+        file.write(f"Delivery Date: {delivery_date}\n")
+        file.write(f"Vehicle Type: {vehicle_type}\n")
+        file.write("-" * 30 + "\n")
+    
+    # Show success message
+    messagebox.showinfo("Success", "Delivery details saved successfully!")
+
+def deliveryscreen():
+    # Initialize the delivery screen window
+    delivery_window = tk.Toplevel()  # Create a new top-level window
+    delivery_window.title("Delivery Details")
+    delivery_window.geometry("600x400")
+    delivery_window.configure(bg="#1E1E1E")
+
+    # Header Label
+    header_label = tk.Label(
+        delivery_window,
+        text="Enter Delivery Details",
+        font=("Arial", 24, "bold"),
+        bg="#1E1E1E",
+        fg="#FFFFFF"
+    )
+    header_label.pack(pady=20)
+
+    # Create a frame for the form inputs
+    form_frame = tk.Frame(delivery_window, bg="#1E1E1E")
+    form_frame.pack(pady=20)
+
+    # Address Input
+    address_label = tk.Label(
+        form_frame,
+        text="Delivery Address:",
+        font=("Arial", 14),
+        bg="#1E1E1E",
+        fg="#FFFFFF"
+    )
+    address_label.grid(row=0, column=0, sticky="w", padx=10, pady=5)
+    address_entry = tk.Entry(form_frame, font=("Arial", 14), width=40)
+    address_entry.grid(row=0, column=1, padx=10, pady=5)
+
+    # Delivery Date Input
+    date_label = tk.Label(
+        form_frame,
+        text="Delivery Date (YYYY-MM-DD):",
+        font=("Arial", 14),
+        bg="#1E1E1E",
+        fg="#FFFFFF"
+    )
+    date_label.grid(row=1, column=0, sticky="w", padx=10, pady=5)
+    date_entry = tk.Entry(form_frame, font=("Arial", 14), width=40)
+    date_entry.grid(row=1, column=1, padx=10, pady=5)
+
+    # Vehicle Type Input
+    vehicle_label = tk.Label(
+        form_frame,
+        text="Vehicle Type:",
+        font=("Arial", 14),
+        bg="#1E1E1E",
+        fg="#FFFFFF"
+    )
+    vehicle_label.grid(row=2, column=0, sticky="w", padx=10, pady=5)
+    vehicle_entry = tk.Entry(form_frame, font=("Arial", 14), width=40)
+    vehicle_entry.grid(row=2, column=1, padx=10, pady=5)
+
+    # Submit Button to save the data
+    def on_submit():
+        address = address_entry.get()
+        delivery_date = date_entry.get()
+        vehicle_type = vehicle_entry.get()
+
+        if not address or not delivery_date or not vehicle_type:
+            messagebox.showerror("Error", "All fields are required!")
+        else:
+            # Save the data
+            save_delivery_data(address, delivery_date, vehicle_type)
+            # Close the delivery screen window
+            delivery_window.destroy()
+
+    submit_button = tk.Button(
+        delivery_window,
+        text="Submit Delivery",
+        font=("Arial", 16),
+        bg="#4CAF50",  # Green color
+        fg="#FFFFFF",
+        command=on_submit,
+        relief="raised",
+        width=20,
+        height=2
+    )
+    submit_button.pack(pady=20)
+
+    # Start the delivery screen window
+    delivery_window.mainloop()
 
 def main_screen():
     # Initialize the main window
@@ -124,9 +225,13 @@ def main_screen():
     )
     title_label.pack(pady=30)
 
+    # Main Content Frame
+    content_frame = tk.Frame(root, bg="#1E1E1E")
+    content_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
     # Left Panel for Function Values
-    left_frame = tk.Frame(root, bg="#1E1E1E", width=400, pady=10, padx=20)
-    left_frame.pack(side="left", fill="y")
+    left_frame = tk.Frame(content_frame, bg="#1E1E1E", width=400, pady=10, padx=20)
+    left_frame.pack(side="left", fill="y", expand=False)
 
     tk.Label(
         left_frame,
@@ -139,9 +244,9 @@ def main_screen():
     # Display Values from Functions
     function_values = {
         "Number of Deliveries": noofdelivery(),
-        "Distance Travelled": disttravelled(),
-        "Driver Salary": salary(),
-        "Fuel Saved": fuelsaved(),
+        "Distance Travelled (km)": disttravelled(),
+        "Driver Salary ($)": salary(),
+        "Fuel Saved (liters)": fuelsaved(),
         "Vehicle Type": vehicletype(),
         "Start Delivery Status": startdelivery(),
     }
@@ -156,40 +261,27 @@ def main_screen():
             pady=10
         ).pack(anchor="w", padx=10)
 
-    # Right Panel for Details
-    right_frame = tk.Frame(root, bg="#1E1E1E", pady=20, padx=20)
-    right_frame.pack(side="right", expand=True, fill="both")
+    # Start Delivery Button
+    def open_delivery_screen():
+        # Call the delivery screen when the button is clicked
+        deliveryscreen()
 
-    tk.Label(
-        right_frame,
-        text="Real-Time Data (Placeholder)",
-        font=("Arial", 18, "bold"),
-        bg="#1E1E1E",
-        fg="#FFFFFF"
-    ).pack(pady=10)
-
-    # Placeholder for real-time data
-    traffic_label = tk.Label(
-        right_frame,
-        text="Traffic Status: Loading...",
-        font=("Arial", 14),
-        bg="#1E1E1E",
-        fg="#FFFFFF"
+    start_button = tk.Button(
+        content_frame,
+        text="Start Delivery",
+        font=("Arial", 16),
+        bg="#4CAF50",  # Green color for the button
+        fg="#FFFFFF",
+        command=open_delivery_screen,  # Trigger the delivery screen
+        relief="raised",
+        width=20,
+        height=2
     )
-    traffic_label.pack(pady=5)
-
-    weather_label = tk.Label(
-        right_frame,
-        text="Weather Info: Loading...",
-        font=("Arial", 14),
-        bg="#1E1E1E",
-        fg="#FFFFFF"
-    )
-    weather_label.pack(pady=5)
+    start_button.pack(pady=20)
 
     # Footer Section
     footer_frame = tk.Frame(root, bg="#2E2E2E", height=50)
-    footer_frame.pack(fill="x")
+    footer_frame.pack(fill="x", side="bottom")
 
     footer_label = tk.Label(
         footer_frame,
@@ -202,7 +294,6 @@ def main_screen():
 
     # Start the main loop
     root.mainloop()
-
 
 # Call the function to display the main screen
 if __name__ == "__main__":
